@@ -2,8 +2,7 @@ use crate::domain::{
     ApiEndpoint, BatchingStrategy, GameProfile, LoadedAppSettings, SaveAppSettingsRequest,
     SaveAppSettingsSummary, StoredAppConfig,
 };
-use keyring::use_native_store;
-use keyring_core::{Entry, Error as KeyringError};
+use keyring_core::{Entry, Error as KeyringError, set_default_store};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
@@ -157,10 +156,24 @@ fn credential_entry() -> Result<Entry, SettingsError> {
 
 fn ensure_keyring_store() -> Result<(), SettingsError> {
     KEYRING_INIT
-        .get_or_init(|| use_native_store(false).map_err(|error| error.to_string()))
+        .get_or_init(initialize_native_keyring_store)
         .as_ref()
         .map_err(|error| SettingsError::Keyring(error.clone()))
         .map(|_| ())
+}
+
+fn initialize_native_keyring_store() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let store = windows_native_keyring_store::Store::new().map_err(|error| error.to_string())?;
+        set_default_store(store);
+        Ok(())
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        Err("native credential store initialization is not configured for this platform".to_owned())
+    }
 }
 
 fn default_config() -> StoredAppConfig {
