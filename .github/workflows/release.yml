@@ -40,10 +40,10 @@ jobs:
         run: bun run build
 
       - name: Test Rust
-        run: cargo test --workspace --locked
+        run: cargo test --workspace
 
       - name: Build Windows exe
-        run: cargo build --release --package rush-patch --target x86_64-pc-windows-msvc --locked
+        run: cargo build --release --package rush-patch --target x86_64-pc-windows-msvc
 
       - name: Prepare release asset
         shell: pwsh
