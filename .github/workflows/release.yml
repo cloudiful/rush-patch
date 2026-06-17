@@ -1,0 +1,92 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-amd64:
+    name: Windows amd64 exe
+    if: ${{ github.server_url == 'https://github.com' }}
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        run: bun run build
+
+      - name: Test Rust
+        run: cargo test --workspace --locked
+
+      - name: Build Windows exe
+        run: cargo build --release --package rush-patch --target x86_64-pc-windows-msvc --locked
+
+      - name: Prepare release asset
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force release | Out-Null
+          Copy-Item target\x86_64-pc-windows-msvc\release\rush-patch.exe release\Rush-Patch-windows-x86_64.exe
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $asset = "release\Rush-Patch-windows-x86_64.exe"
+
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $tag = $env:GITHUB_REF_NAME
+            $PSNativeCommandUseErrorActionPreference = $false
+            gh release view $tag *> $null
+            $releaseExists = $LASTEXITCODE -eq 0
+            $PSNativeCommandUseErrorActionPreference = $true
+
+            if ($releaseExists) {
+              gh release upload $tag $asset --clobber
+              gh release edit $tag --title "Rush Patch $tag" --prerelease=false --latest
+            } else {
+              gh release create $tag $asset --title "Rush Patch $tag" --notes "Windows x86_64 executable." --verify-tag --latest
+            }
+          } else {
+            $PSNativeCommandUseErrorActionPreference = $false
+            gh release view latest *> $null
+            $releaseExists = $LASTEXITCODE -eq 0
+            $PSNativeCommandUseErrorActionPreference = $true
+
+            if ($releaseExists) {
+              gh release delete latest --yes --cleanup-tag
+            }
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -f latest $env:GITHUB_SHA
+            git push origin refs/tags/latest --force
+
+            gh release create latest $asset --title "Rush Patch latest" --notes "Latest Windows x86_64 prerelease from main." --prerelease --latest=false --verify-tag
+          }

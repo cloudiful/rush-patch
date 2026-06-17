@@ -1,0 +1,38 @@
+INSERT INTO planning_batches (
+    run_id,
+    batch_index,
+    segment_index,
+    batch_order_in_segment,
+    unit_count,
+    batch_kind,
+    source_segments,
+    group_count,
+    estimated_input_tokens,
+    target_input_tokens,
+    batching_strategy,
+    hard_prompt_body_tokens,
+    flush_reason,
+    pool_directory,
+    source_files_json,
+    planned_at,
+    completed_at,
+    status
+)
+VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, 'planned')
+ON CONFLICT(run_id, batch_index) DO UPDATE SET
+    segment_index = excluded.segment_index,
+    batch_order_in_segment = excluded.batch_order_in_segment,
+    unit_count = excluded.unit_count,
+    batch_kind = excluded.batch_kind,
+    source_segments = excluded.source_segments,
+    group_count = excluded.group_count,
+    estimated_input_tokens = excluded.estimated_input_tokens,
+    target_input_tokens = excluded.target_input_tokens,
+    batching_strategy = excluded.batching_strategy,
+    hard_prompt_body_tokens = excluded.hard_prompt_body_tokens,
+    flush_reason = excluded.flush_reason,
+    pool_directory = excluded.pool_directory,
+    source_files_json = excluded.source_files_json,
+    planned_at = excluded.planned_at,
+    completed_at = excluded.completed_at,
+    status = excluded.status;

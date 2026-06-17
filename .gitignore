@@ -1,0 +1,8 @@
+/target
+node_modules
+web-dist
+bun.lock
+Cargo.lock
+src-tauri/target
+src-tauri/dev/*
+!src-tauri/dev/catalog-dev.sqlite

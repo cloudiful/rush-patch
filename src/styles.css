@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgb(255 247 230) 0%, transparent 34%),
+    linear-gradient(135deg, rgb(244 239 230) 0%, rgb(238 233 224) 100%);
+  color: rgb(41 28 20);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.p-card {
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 0.96);
+}
+
+.p-card .p-card-body {
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.p-card .p-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.p-panel {
+  border-color: rgb(231 229 228);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.p-panel .p-panel-header {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.p-panel .p-panel-content {
+  padding: 0.85rem;
+}
+
+.p-inputtext,
+.p-password-input,
+.p-select {
+  min-height: 2.45rem;
+}
+
+.p-menu {
+  padding: 0;
+}
+
+.p-menu .p-menu-item-content {
+  border-radius: 0.9rem;
+}
+
+.rp-primary-button.p-button {
+  border-color: rgb(20 184 166);
+  background: rgb(20 184 166);
+  color: white;
+}
+
+.rp-primary-button.p-button:not(:disabled):hover {
+  border-color: rgb(15 118 110);
+  background: rgb(15 118 110);
+}
+
+.p-button {
+  border-radius: 0.85rem;
+}
